@@ -1,0 +1,63 @@
+const express = require("express")
+const multer = require("multer")
+const axios = require("axios")
+const path = require("path")
+const fs = require("fs")
+const cors = require("cors")
+
+const app = express()
+app.use(cors())
+app.use(express.static("public"))
+app.use("/uploads", express.static("uploads"))
+
+const BOT_TOKEN = "8725202010:AAGADFmY-zFP-VUWza8EQ0lMoTovMxF4bPs"
+const CHAT_ID = "-1003720603417"
+
+const storage = multer.diskStorage({
+ destination: "uploads/",
+ filename: (req, file, cb) => {
+  cb(null, Date.now() + "-" + file.originalname)
+ }
+})
+
+const upload = multer({ storage })
+
+app.post("/upload", upload.array("files", 5), async (req, res) => {
+
+ try {
+
+  const files = req.files
+  let links = []
+
+  for (const file of files) {
+
+   const filePath = path.join(__dirname, file.path)
+
+   const form = new FormData()
+   form.append("chat_id", CHAT_ID)
+   form.append("caption", `📁 File Uploaded\n\n📄 ${file.originalname}`)
+   form.append("document", fs.createReadStream(filePath))
+
+   await axios.post(
+    `https://api.telegram.org/bot${BOT_TOKEN}/sendDocument`,
+    form,
+    { headers: form.getHeaders() }
+   )
+
+   const downloadLink = `${req.protocol}://${req.get("host")}/uploads/${file.filename}`
+
+   links.push(downloadLink)
+
+  }
+
+  res.json({ links })
+
+ } catch (error) {
+  res.status(500).json({ error: "Upload Failed" })
+ }
+
+})
+
+app.listen(3000, () => {
+ console.log("Server running on port 3000")
+})
