@@ -1,11 +1,13 @@
 const express = require("express")
 const multer = require("multer")
 const axios = require("axios")
-const path = require("path")
 const fs = require("fs")
+const path = require("path")
 const cors = require("cors")
+const FormData = require("form-data")
 
 const app = express()
+
 app.use(cors())
 app.use(express.static("public"))
 app.use("/uploads", express.static("uploads"))
@@ -15,49 +17,45 @@ const CHAT_ID = "-1003720603417"
 
 const storage = multer.diskStorage({
  destination: "uploads/",
- filename: (req, file, cb) => {
-  cb(null, Date.now() + "-" + file.originalname)
+ filename: (req,file,cb)=>{
+  cb(null,Date.now()+"-"+file.originalname)
  }
 })
 
-const upload = multer({ storage })
+const upload = multer({storage})
 
-app.post("/upload", upload.array("files", 5), async (req, res) => {
+app.post("/upload", upload.array("files",5), async(req,res)=>{
 
- try {
+ const caption = req.body.caption || "New Upload"
 
-  const files = req.files
-  let links = []
+ let links = []
 
-  for (const file of files) {
+ for(const file of req.files){
 
-   const filePath = path.join(__dirname, file.path)
+  const form = new FormData()
 
-   const form = new FormData()
-   form.append("chat_id", CHAT_ID)
-   form.append("caption", `📁 File Uploaded\n\n📄 ${file.originalname}`)
-   form.append("document", fs.createReadStream(filePath))
+  form.append("chat_id",CHAT_ID)
+  form.append("caption",caption)
+  form.append("document",fs.createReadStream(file.path))
 
-   await axios.post(
-    `https://api.telegram.org/bot${BOT_TOKEN}/sendDocument`,
-    form,
-    { headers: form.getHeaders() }
-   )
+  await axios.post(
+   `https://api.telegram.org/bot${BOT_TOKEN}/sendDocument`,
+   form,
+   {headers:form.getHeaders()}
+  )
 
-   const downloadLink = `${req.protocol}://${req.get("host")}/uploads/${file.filename}`
+  const link = `${req.protocol}://${req.get("host")}/uploads/${file.filename}`
 
-   links.push(downloadLink)
+  links.push(link)
 
-  }
-
-  res.json({ links })
-
- } catch (error) {
-  res.status(500).json({ error: "Upload Failed" })
  }
+
+ res.json({links})
 
 })
 
-app.listen(3000, () => {
- console.log("Server running on port 3000")
+const PORT = process.env.PORT || 3000
+
+app.listen(PORT,()=>{
+ console.log("Server running")
 })
