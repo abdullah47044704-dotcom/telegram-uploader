@@ -1,7 +1,6 @@
 function upload(){
 
 let files=document.getElementById("files").files
-
 let caption=document.getElementById("caption").value
 
 let form=new FormData()
@@ -28,7 +27,7 @@ let time=(Date.now()-start)/1000
 
 let speed=(e.loaded/1024/1024/time).toFixed(2)
 
-document.getElementById("progress").innerHTML="Progress: "+percent+"%"
+document.getElementById("progress").innerHTML="Uploading: "+percent+"%"
 
 document.getElementById("speed").innerHTML="Speed: "+speed+" MB/s"
 
@@ -36,17 +35,13 @@ document.getElementById("speed").innerHTML="Speed: "+speed+" MB/s"
 
 xhr.onload=()=>{
 
-let res=JSON.parse(xhr.response)
+document.getElementById("progress").innerHTML="Successful ✅"
 
-let html=""
+setTimeout(()=>{
 
-res.links.forEach(l=>{
+location.reload()
 
-html+=`<a href="${l}" target="_blank">${l}</a><br>`
-
-})
-
-document.getElementById("links").innerHTML=html
+},2000)
 
 }
 
