@@ -1,22 +1,29 @@
 <!DOCTYPE html>
 <html>
-
 <head>
 
-<title>Telegram File Uploader</title>
+<title>Telegram Uploader</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
 <link rel="stylesheet" href="style.css">
 
 </head>
 
 <body>
 
-<div class="container">
+<div class="bg"></div>
 
-<h1>Upload Files</h1>
+<div class="card">
+
+<h2>Upload Files</h2>
+
+<textarea id="caption" placeholder="Write caption..."></textarea>
 
 <input type="file" id="files" multiple>
 
 <button onclick="upload()">Upload</button>
+
+<div id="progress"></div>
 
 <div id="links"></div>
 
