@@ -1,32 +1,47 @@
 async function upload(){
 
-const files = document.getElementById("files").files
+const files=document.getElementById("files").files
+const caption=document.getElementById("caption").value
 
-const form = new FormData()
+const form=new FormData()
 
-for(let file of files){
+for(let f of files){
 
-form.append("files",file)
+form.append("files",f)
 
 }
 
-const res = await fetch("/upload",{
+form.append("caption",caption)
 
-method:"POST",
-body:form
+const xhr=new XMLHttpRequest()
 
-})
+xhr.open("POST","/upload")
 
-const data = await res.json()
+xhr.upload.onprogress=(e)=>{
+
+let percent=Math.round((e.loaded/e.total)*100)
+
+document.getElementById("progress").innerHTML=
+"Uploading: "+percent+"%"
+
+}
+
+xhr.onload=()=>{
+
+const res=JSON.parse(xhr.response)
 
 let html=""
 
-data.links.forEach(link=>{
+res.links.forEach(l=>{
 
-html += `<p><a href="${link}" target="_blank">${link}</a></p>`
+html+=`<a href="${l}" target="_blank">${l}</a><br>`
 
 })
 
 document.getElementById("links").innerHTML=html
+
+}
+
+xhr.send(form)
 
 }
