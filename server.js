@@ -29,21 +29,25 @@ let links=[]
 
 for(let file of req.files){
 
+let link=`${req.protocol}://${req.get("host")}/uploads/${file.filename}`
+
 let form=new FormData()
 
 form.append("chat_id",CHAT_ID)
 
-form.append("caption",caption+"\n\n"+file.originalname)
+form.append("caption",
+caption +
+"\n\n⬇ Download Link:\n" +
+link
+)
 
-form.append("document",fs.createReadStream(file.path))
+form.append("video",fs.createReadStream(file.path))
 
 await axios.post(
-`https://api.telegram.org/bot${BOT_TOKEN}/sendDocument`,
+`https://api.telegram.org/bot${BOT_TOKEN}/sendVideo`,
 form,
 {headers:form.getHeaders()}
 )
-
-let link=`${req.protocol}://${req.get("host")}/uploads/${file.filename}`
 
 links.push(link)
 
@@ -53,4 +57,6 @@ res.json({links})
 
 })
 
-app.listen(3000)
+const PORT=process.env.PORT||3000
+
+app.listen(PORT)
